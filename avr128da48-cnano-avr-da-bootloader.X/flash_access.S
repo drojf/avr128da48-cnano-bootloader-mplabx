@@ -24,30 +24,33 @@
 
 #include "utils\assembler.h"
 
+// For details on the AVR-GCC calling convention, see http://www.nongnu.org/avr-libc/user-manual/FAQ.html#faq_reg_usage
+
 PUBLIC_FUNCTION(pgm_jmp_far)
   
     movw    r30, r22                    // Update R30, R31 pair with address[Byte1,Byte0]
-    out        _SFR_IO_ADDR(RAMPZ), r24    // Update RAMPZ with address[Byte2]
-    ijmp
+    out     _SFR_IO_ADDR(RAMPZ), r24    // Update RAMPZ with address[Byte2]
+    ijmp                                // Sets PC to contents of Z register
     ret                                 // Return to caller
 
 END_FUNC(pgm_jmp_far)
 
 PUBLIC_FUNCTION(pgm_word_write)
 
-    movw    r0, r20
+    movw    r0, r20                     // Put data in R1:R0 for use with the spm function
     movw    r30, r22                    // Update R30, R31 pair with address[Byte1,Byte0]
-    out        _SFR_IO_ADDR(RAMPZ), r24    // Update RAMPZ with address[Byte2]
-    spm
-    clr        r1
+    out     _SFR_IO_ADDR(RAMPZ), r24    // Update RAMPZ with address[Byte2]
+    spm                                 // Store program memory: Uses R1:R0 as data, and RAMPZ:Z-register (RAMPZ:R31:R30) as address
+    clr     r1                          // Since we wrote to r1, we must clear it before returning, see http://www.nongnu.org/avr-libc/user-manual/FAQ.html#faq_reg_usage
     ret                                 // Return to caller
 
 END_FUNC(pgm_word_write)
 
+// I don't think this function is ever used
 PUBLIC_FUNCTION(protected_write_io)
 
     out     _SFR_IO_ADDR(RAMPZ), r1     // Clear bits [23:16] of Z register
-    movw    r30, r24                    // Load addrress into Z register
+    movw    r30, r24                    // Load address into Z register
     out     CCP, r22                    // Start CCP handshake
     st      Z, r20                      // Write value to I/O register
     ret                                 // Return to caller

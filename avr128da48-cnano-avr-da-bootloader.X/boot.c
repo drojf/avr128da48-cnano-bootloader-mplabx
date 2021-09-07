@@ -134,9 +134,14 @@ void bootloader(void)
         switch(boot_state)
         {
             case READ_START_MARK:
+                // Shift one byte at a time, forming a 32 bit number
+                // Once the word matches the start mark (an arbitrary number defined in BOOTLOADER_START_MARK), assume that this is the start of the header
+                // This provides some synchronization to the data upload / makes the protocol more lenient of framing or buffering problems
+                // The all the information for the header will be placed in the image_info struct (of type application_code_info)
                 current_mark <<= 8;
                 current_mark &= 0xFFFFFF00;
                 current_mark |= (rx_data & 0xFF);
+
                 if (current_mark == BOOTLOADER_START_MARK)
                 {
                     /* If "INFO" tag was received, continue with reading the app info */
@@ -149,10 +154,14 @@ void bootloader(void)
             break;
             
             case READ_APP_INFO:
+                // Write into app_ptr, which has previously been set to point to the image_info struct
                 *app_ptr = rx_data;
                 app_ptr++;
                 cnt++;
                 
+                // TODO: not sure if this is safe to do - theoretically application_code_info is not defined with the
+                // __packed__ attribute, so may have gaps in it, which could cause the below code not to work.
+                // Since the header is simple, may be easier to manually interpret the data instead
                 if (cnt == sizeof(application_code_info))
                 {
                     /* If all the information section was received, continue with reading "STX0" tag */
@@ -172,10 +181,13 @@ void bootloader(void)
                 {
                     /* If "STX0" tag was received, continue with storing the application image in the Flash */
                     boot_state = WRITE_FLASH;
+
+                    // Reset cnt to zero as it is re-used in the next state
                     cnt = 0;
                 }
                 else 
                 {
+                    // Assume that there is an error if the app info is not immediately followed by the image start mark
                     if (cnt > MARK_SIZE)
                     {   
                         /* Restart waiting for start mark */
@@ -229,7 +241,7 @@ void bootloader(void)
                     pgm_word_write((flash_addr & 0xFFFFFE), data_word);
                 }
 
-                /* Increment address before writing to Flash */
+                /* Increment address each time (even if we didn't write to flash) */
                 flash_addr++;
                 
                 cnt++;
