@@ -80,6 +80,7 @@ static inline void STATUS_LED_init(void);
 static inline void STATUS_LED_toggle(void);
 static inline void STATUS_LED_set(void);
 static inline void STATUS_LED_clear(void);
+static inline void BUTTON_init(void);
 static uint8_t BUTTON_read(void);
 
 /* Bootloader function */
@@ -96,8 +97,10 @@ __attribute__((naked)) __attribute__((section(".ctors"))) void boot(void)
     /* Initialize system for AVR GCC support, expects r1 = 0 */
     asm volatile("clr r1");
     
+    BUTTON_init();
     STATUS_LED_init();
     STATUS_LED_set();
+    
     /* Check if entering application or continuing to bootloader */
     if(!BOOTLOADER_isRequested()) 
     {
@@ -310,29 +313,38 @@ static void USART_write(uint8_t byte)
 static inline void STATUS_LED_init(void)
 {
     /* Set LED0 (PC6) as output */
-    VPORTC.DIR |= PIN6_bm;
+    VPORTB.DIR |= PIN3_bm;
 }
 
 static inline void STATUS_LED_toggle(void)
 {
     /* Toggle LED0 (PC6) */
-    VPORTC.OUT ^= PIN6_bm;
+    VPORTB.OUT ^= PIN3_bm;
 }
 
 static inline void STATUS_LED_set(void)
 {
     /* Toggle LED0 (PC6) */
-    VPORTC.OUT |=  PIN6_bm;
+    VPORTB.OUT |=  PIN3_bm;
 }
 
 static inline void STATUS_LED_clear(void)
 {
     /* Toggle LED0 (PC6) */
-    VPORTC.OUT &=  ~PIN6_bm;
+    VPORTB.OUT &=  ~PIN3_bm;
 }
+
+static inline void BUTTON_init(void)
+{
+    /* Set Button input */
+    VPORTB.DIR &= ~PIN2_bm;
+    /* Set Button pull up */
+    PORTB.PIN2CTRL |= PORT_PULLUPEN_bm;
+}
+
 
 static uint8_t BUTTON_read(void)
 {
-    /* Read value on SW0 (PC7) */
-    return (!(VPORTC.IN & PIN7_bm));
+    /* Read value on SW0 (PB2) */
+    return (!(VPORTB.IN & PIN2_bm));
 }
