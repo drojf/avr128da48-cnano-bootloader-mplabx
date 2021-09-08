@@ -1,5 +1,4 @@
 
-python AVR-DA_uploader.py {path_to_hex_file} {flash_size} {COM_port} {baud_rate}
+python AVR-DA_uploader.py "..\avr128da48-cnano-avr-da-host-app.X\dist\Release\production\AVR-Dx_App_Example.X.production.hex" 128000 COM11 9600
 pause
 
-exit

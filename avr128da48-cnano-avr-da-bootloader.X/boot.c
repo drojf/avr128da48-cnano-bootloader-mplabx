@@ -23,7 +23,7 @@
  */
 
 #define F_CPU                           (4000000UL)         /* using default clock 4MHz*/
-#define USART1_BAUD_RATE(BAUD_RATE)     ((float)(64 * F_CPU / (16 * (float)BAUD_RATE)) + 0.5)
+#define USART3_BAUD_RATE(BAUD_RATE)     ((float)(64 * F_CPU / (16 * (float)BAUD_RATE)) + 0.5)
 
 #include <avr/io.h>
 #include <avr/pgmspace.h>
@@ -276,35 +276,35 @@ void bootloader(void)
  */
 static void USART_init(void)
 {
-    VPORTC.DIR &= ~PIN1_bm;                                 /* set pin 1 of PORT C (RXd) as input*/
-    VPORTC.DIR |= PIN0_bm;                                  /* set pin 0 of PORT C (TXd) as output*/
+    VPORTB.DIR &= ~PIN1_bm;                                 /* set pin 1 of PORT B (RXd) as input*/
+    VPORTB.DIR |= PIN0_bm;                                  /* set pin 0 of PORT B (TXd) as output*/
 
-    USART1.BAUD = (uint16_t)(USART1_BAUD_RATE(9600));       /* set the baud rate*/
-    USART1.CTRLC = USART_CHSIZE0_bm | USART_CHSIZE1_bm;     /* set the data format to 8-bit*/
-    USART1.CTRLB |= (USART_TXEN_bm | USART_RXEN_bm);        /* enable transmitter*/
+    USART3.BAUD = (uint16_t)(USART3_BAUD_RATE(9600));       /* set the baud rate*/
+    USART3.CTRLC = USART_CHSIZE0_bm | USART_CHSIZE1_bm;     /* set the data format to 8-bit*/
+    USART3.CTRLB |= (USART_TXEN_bm | USART_RXEN_bm);        /* enable transmitter*/
  
  }
 
 static uint8_t USART_read(void)
 {
     /* Poll for data received */
-    while (!(USART1.STATUS & USART_RXCIF_bm))
+    while (!(USART3.STATUS & USART_RXCIF_bm))
     {
         ;
     }  
       
-    return USART1.RXDATAL;
+    return USART3.RXDATAL;
 }
 
 static void USART_write(uint8_t byte)
 {
-    while (!(USART1.STATUS & USART_DREIF_bm))
+    while (!(USART3.STATUS & USART_DREIF_bm))
     {
         ;
     } 
            
     /* Data will be sent when TXDATA is written */
-    USART1.TXDATAL = byte;
+    USART3.TXDATAL = byte;
 }
 
 /*

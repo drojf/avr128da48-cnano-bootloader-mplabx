@@ -43,12 +43,12 @@ int main(void)
 
 static inline void STATUS_LED_init(void)
 {
-    /* Set LED0 (PC6) as output */
-    VPORTC.DIR |= PIN6_bm;
+    /* Set LED0 (PB3) as output */
+    VPORTB.DIR |= PIN3_bm;
 }
 
 static inline void STATUS_LED_toggle(void)
 {
-    /* Toggle LED0 (PC6) */
-    VPORTC.OUT ^= PIN6_bm;
+    /* Toggle LED0 (PB3) */
+    VPORTB.OUT ^= PIN3_bm;
 }
