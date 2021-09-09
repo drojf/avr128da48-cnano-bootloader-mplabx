@@ -56,6 +56,8 @@ def addInfo(hex_file, flash_size, VMajor, Vminor):
 	if (append > flashsize):
 		print ("Error: Flashsize input: %#06x, " % (flashsize) +
 			   "Minimum size needed: %#06x." % (append))
+		print(f"Flash size in bytes: {flashsize}")
+		print(f"Highest address in hex file: {append}");
 		sys.exit(1)
 	appstart = ih.minaddr()
 	print ("\n","Start Address: %#06x" % (appstart ))
