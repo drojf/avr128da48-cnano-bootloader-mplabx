@@ -5,3 +5,6 @@
 /*/nbproject/*.mk
 /*/nbproject/*.bash
 /*/.generated_files/
+
+*.o
+*.d
